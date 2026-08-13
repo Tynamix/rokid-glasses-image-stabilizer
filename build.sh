@@ -21,6 +21,7 @@ cp "$NATIVE_DIR/"*.so "$BUILD/lib/arm64-v8a/"
 
 javac --release 8 -classpath "$PLATFORM" -d "$BUILD/classes" \
   "$ROOT/src/com/rokid/media/process/MediaManager.java" \
+  "$ROOT/src/com/roman/rokidarcsoft/SynchronizationService.java" \
   "$ROOT/src/com/roman/rokidarcsoft/MainActivity.java"
 jar cf "$BUILD/classes.jar" -C "$BUILD/classes" .
 

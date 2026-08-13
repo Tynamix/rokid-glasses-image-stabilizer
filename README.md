@@ -3,13 +3,19 @@
 A small Android application for recovering stabilization of Rokid AI Glasses
 videos when the Rokid mobile app fails to apply it automatically.
 
-The app lets the user:
+The app lets the user start one synchronization. It searches
+`Downloads/Hi Rokid/` for MP4 videos that have a TXT file with the same base
+name, for example `video1234.mp4` and `video1234.txt`.
 
-1. Select an MP4 video.
-2. Select the matching Rokid gyro TXT file, or let the app find a TXT file with
-   the same base name in the same folder.
-3. Start conversion and watch native progress updates.
-4. Open the converted video or open the `Movies/Rokid Arcsoft` folder.
+All matching pairs are converted one after another. After a successful
+conversion, the original MP4 and its TXT file are removed and the converted
+video is written back using the original MP4 filename. Failed pairs are kept
+so they can be retried during a later synchronization.
+
+The synchronization runs in an Android foreground service with a persistent
+notification and a partial wake lock. It therefore continues while the app is
+in the background or the phone display is turned off. The app shows the
+current video number, filename, and native conversion progress.
 
 The converter does not use Gyroflow. It calls the native Rokid media-processing
 pipeline, which in turn calls Arcsoft Video Stabilizer. Processing is local and
@@ -119,16 +125,18 @@ adb install -r Rokid-Arcsoft-Converter.apk
 If Android blocks installation from a file manager, enable installation from
 that source in Android settings or install with `adb`.
 
-## Output
+## Synchronization Folder
 
-Completed videos are written to:
+The app reads and writes files in:
 
 ```text
-Movies/Rokid Arcsoft/
+Downloads/Hi Rokid/
 ```
 
-The input MP4 and TXT file are copied into the app's private working directory
-while processing. They are not uploaded anywhere.
+Only MP4/TXT pairs in that directory are processed. The input files are copied
+into the app's private working directory while processing. They are not
+uploaded anywhere. Android displays a persistent notification while the
+foreground service is active.
 
 ## Project Layout
 
