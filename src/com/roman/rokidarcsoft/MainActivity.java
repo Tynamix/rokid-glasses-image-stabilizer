@@ -18,7 +18,8 @@ public final class MainActivity extends Activity {
     private static final int STORAGE_PERMISSION_REQUEST = 10;
 
     private Button synchronizeButton;
-    private ProgressBar progress;
+    private ProgressBar fileProgress;
+    private ProgressBar overallProgress;
     private TextView statusLabel;
     private TextView currentLabel;
     private SynchronizationService service;
@@ -92,15 +93,24 @@ public final class MainActivity extends Activity {
         synchronizeButton.setOnClickListener(v -> requestSynchronization());
         addTopMargin(root, synchronizeButton);
 
-        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(100);
-        progress.setProgress(0);
+        root.addView(label(getString(R.string.file_progress)), new LinearLayout.LayoutParams(-1, -2));
+        fileProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        fileProgress.setMax(100);
+        fileProgress.setProgress(0);
         LinearLayout.LayoutParams progressParams = new LinearLayout.LayoutParams(-1, 40);
         progressParams.topMargin = 24;
-        root.addView(progress, progressParams);
+        root.addView(fileProgress, progressParams);
 
         currentLabel = label("");
         root.addView(currentLabel);
+
+        LinearLayout.LayoutParams overallLabelParams = new LinearLayout.LayoutParams(-1, -2);
+        overallLabelParams.topMargin = 16;
+        root.addView(label(getString(R.string.overall_progress)), overallLabelParams);
+        overallProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        overallProgress.setMax(100);
+        overallProgress.setProgress(0);
+        root.addView(overallProgress, new LinearLayout.LayoutParams(-1, 40));
 
         statusLabel = label(getString(R.string.ready));
         LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(-1, -2);
@@ -165,7 +175,10 @@ public final class MainActivity extends Activity {
     }
 
     private void renderStatus(SynchronizationService.Status status) {
-        progress.setProgress(status.currentPercent);
+        fileProgress.setProgress(status.currentPercent);
+        int overallPercent = status.total == 0 ? 0
+                : (int) (((long) status.processed * 100 + status.currentPercent) / status.total);
+        overallProgress.setProgress(Math.max(0, Math.min(100, overallPercent)));
         synchronizeButton.setEnabled(!status.running);
 
         if (status.total > 0 && status.running) {

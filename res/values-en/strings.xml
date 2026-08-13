@@ -6,6 +6,8 @@
     <string name="ready">Ready</string>
     <string name="storage_permission_denied">Error: Access to Downloads was not allowed.</string>
     <string name="sync_preparing">Preparing synchronization...</string>
+    <string name="file_progress">Current file</string>
+    <string name="overall_progress">Overall progress</string>
     <string name="progress_position_filename">%1$d/%2$d - %3$s</string>
     <string name="progress_position">%1$d/%2$d</string>
     <string name="no_unprocessed_videos">No unprocessed videos found.</string>
