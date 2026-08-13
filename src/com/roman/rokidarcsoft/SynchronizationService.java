@@ -39,7 +39,7 @@ public final class SynchronizationService extends Service {
     private final IBinder binder = new LocalBinder();
     private final List<Listener> listeners = new CopyOnWriteArrayList<>();
     private final Object stateLock = new Object();
-    private volatile Status status = new Status(false, false, 0, 0, 0, "", "Bereit");
+    private volatile Status status = new Status(false, false, 0, 0, 0, "", "");
     private volatile boolean running;
     private volatile MediaManager activeManager;
     private Thread worker;
@@ -96,6 +96,7 @@ public final class SynchronizationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        status = new Status(false, false, 0, 0, 0, "", getString(R.string.ready));
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         createNotificationChannel();
     }
@@ -103,7 +104,7 @@ public final class SynchronizationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (!running) {
-            startForeground(NOTIFICATION_ID, notification("Synchronisierung wird vorbereitet...", 0));
+            startForeground(NOTIFICATION_ID, notification(getString(R.string.sync_preparing), 0));
             running = true;
             acquireWakeLock();
             worker = new Thread(this::runSynchronization, "rokid-synchronization");
@@ -144,7 +145,7 @@ public final class SynchronizationService extends Service {
     private void runSynchronization() {
         try {
             if (!hasStoragePermission()) {
-                finishSynchronization("Fehler: Zugriff auf Downloads wurde nicht erlaubt.", 0, 0);
+                finishSynchronization(getString(R.string.storage_permission_denied), 0, 0);
                 return;
             }
 
@@ -153,17 +154,17 @@ public final class SynchronizationService extends Service {
                     "Hi Rokid");
             List<VideoPair> pairs = findPairs(inputDirectory);
             publish(0, pairs.size(), 0, "", pairs.isEmpty()
-                    ? "Keine unverarbeiteten Videos gefunden."
-                    : "Synchronisierung gestartet...");
+                    ? getString(R.string.no_unprocessed_videos)
+                    : getString(R.string.sync_started));
             if (pairs.isEmpty()) {
-                finishSynchronization("Keine unverarbeiteten Videos gefunden.", 0, 0);
+                finishSynchronization(getString(R.string.no_unprocessed_videos), 0, 0);
                 return;
             }
 
             File workDirectory = new File(getExternalFilesDir(Environment.DIRECTORY_MOVIES),
                     WORK_DIRECTORY);
             if (!workDirectory.exists() && !workDirectory.mkdirs()) {
-                finishSynchronization("Fehler: Arbeitsordner konnte nicht erstellt werden.",
+                finishSynchronization(getString(R.string.work_directory_error),
                         0, pairs.size());
                 return;
             }
@@ -173,29 +174,28 @@ public final class SynchronizationService extends Service {
             for (VideoPair pair : pairs) {
                 int position = processed + 1;
                 publish(processed, pairs.size(), 0, pair.video.getName(),
-                        "Konvertiere " + position + "/" + pairs.size() + "...");
+                        getString(R.string.converting, position, pairs.size()));
                 boolean success = convertPair(pair, workDirectory);
                 if (!success) failures++;
                 processed++;
                 if (success) {
                     publish(processed, pairs.size(), 100, pair.video.getName(),
-                            "Erfolgreich synchronisiert: " + pair.video.getName());
+                            getString(R.string.conversion_success, pair.video.getName()));
                 }
             }
 
             String message;
             if (failures == 0) {
-                message = "Synchronisierung abgeschlossen: " + processed + "/"
-                        + pairs.size() + " Videos erfolgreich.";
+                message = getString(R.string.sync_complete, processed, pairs.size());
             } else {
-                message = "Synchronisierung abgeschlossen: " + (processed - failures)
-                        + "/" + pairs.size() + " erfolgreich, " + failures
-                        + " Fehler. Fehlgeschlagene Paare wurden behalten.";
+                message = getString(R.string.sync_complete_with_errors, processed - failures,
+                        pairs.size(), failures);
             }
             finishSynchronization(message, processed, pairs.size());
         } catch (Throwable error) {
             String message = error.getMessage();
-            finishSynchronization("Fehler: " + (message == null ? error.toString() : message),
+            finishSynchronization(getString(R.string.error_message,
+                            message == null ? error.toString() : message),
                     status.processed, status.total);
         }
     }
@@ -260,9 +260,10 @@ public final class SynchronizationService extends Service {
             manager.setListener(new MediaManager.Listener() {
                 @Override
                 public void onProgress(int percent) {
-                    publish(status.processed, status.total, percent, pair.video.getName(),
-                            "Konvertiere " + (status.processed + 1) + "/" + status.total
-                                    + " - " + percent + "%");
+                    int processed = status.processed;
+                    int total = status.total;
+                    publish(processed, total, percent, pair.video.getName(),
+                            getString(R.string.converting_percent, processed + 1, total, percent));
                 }
 
                 @Override
@@ -281,23 +282,23 @@ public final class SynchronizationService extends Service {
             int startResult = manager.start(input.getAbsolutePath(), output.getAbsolutePath(),
                     sensor.getAbsolutePath());
             if (startResult != 0) {
-                publishFailure(pair, "Start fehlgeschlagen: " + startResult);
+                publishFailure(pair, getString(R.string.start_failed, startResult));
                 return false;
             }
             nativeResult.latch.await();
             if (!nativeResult.completed) {
-                publishFailure(pair, "Arcsoft-Fehler: " + nativeResult.errorCode);
+                publishFailure(pair, getString(R.string.arcsoft_error, nativeResult.errorCode));
                 return false;
             }
             if (!output.isFile() || output.length() == 0) {
-                publishFailure(pair, "Arcsoft-Ausgabe fehlt");
+                publishFailure(pair, getString(R.string.output_missing));
                 return false;
             }
             replaceOriginal(pair.video, pair.sensor, output);
             return true;
         } catch (InterruptedException error) {
             Thread.currentThread().interrupt();
-            publishFailure(pair, "Verarbeitung wurde unterbrochen");
+            publishFailure(pair, getString(R.string.processing_interrupted));
             return false;
         } catch (Exception error) {
             String message = error.getMessage();
@@ -327,17 +328,23 @@ public final class SynchronizationService extends Service {
         deleteIfExists(videoBackup);
         deleteIfExists(sensorBackup);
         copyFile(output, replacement);
-        if (replacement.length() == 0) throw new Exception("Neue Videodatei ist leer");
+        if (replacement.length() == 0) throw new Exception(getString(R.string.new_video_empty));
 
         boolean videoBackedUp = false;
         boolean sensorBackedUp = false;
         boolean replacementInstalled = false;
         try {
-            if (!video.renameTo(videoBackup)) throw new Exception("Originalvideo konnte nicht gesichert werden");
+            if (!video.renameTo(videoBackup)) {
+                throw new Exception(getString(R.string.backup_original_failed));
+            }
             videoBackedUp = true;
-            if (!sensor.renameTo(sensorBackup)) throw new Exception("TXT-Datei konnte nicht entfernt werden");
+            if (!sensor.renameTo(sensorBackup)) {
+                throw new Exception(getString(R.string.backup_txt_failed));
+            }
             sensorBackedUp = true;
-            if (!replacement.renameTo(video)) throw new Exception("Neues Video konnte nicht eingesetzt werden");
+            if (!replacement.renameTo(video)) {
+                throw new Exception(getString(R.string.install_new_video_failed));
+            }
             replacementInstalled = true;
             deleteQuietly(videoBackup);
             deleteQuietly(sensorBackup);
@@ -352,7 +359,7 @@ public final class SynchronizationService extends Service {
 
     private void publishFailure(VideoPair pair, String reason) {
         publish(status.processed, status.total, 0, pair.video.getName(),
-                "Fehler bei " + pair.video.getName() + ": " + reason);
+                getString(R.string.pair_error, pair.video.getName(), reason));
     }
 
     private void publish(int processed, int total, int percent, String currentName,
@@ -403,8 +410,8 @@ public final class SynchronizationService extends Service {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                "Rokid Synchronization", NotificationManager.IMPORTANCE_LOW);
-        channel.setDescription("Fortschritt der Rokid-Videosynchronisierung");
+                getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_LOW);
+        channel.setDescription(getString(R.string.notification_channel_description));
         notificationManager.createNotificationChannel(channel);
     }
 
@@ -413,7 +420,7 @@ public final class SynchronizationService extends Service {
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
         builder.setSmallIcon(android.R.drawable.stat_sys_upload)
-                .setContentTitle("Rokid Synchronization")
+                .setContentTitle(getString(R.string.notification_title))
                 .setContentText(message)
                 .setOngoing(true)
                 .setProgress(100, percent, false);
@@ -436,7 +443,9 @@ public final class SynchronizationService extends Service {
     }
 
     private void deleteIfExists(File file) throws IOException {
-        if (file.exists() && !file.delete()) throw new IOException("Datei konnte nicht gelöscht werden: " + file.getName());
+        if (file.exists() && !file.delete()) {
+            throw new IOException(getString(R.string.file_delete_failed, file.getName()));
+        }
     }
 
     private void deleteQuietly(File file) {

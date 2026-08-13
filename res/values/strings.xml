@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid Arcsoft Converter</string>
+    <string name="sync_description">Sucht in Downloads/Hi Rokid nach MP4-Dateien mit passender TXT-Datei und synchronisiert sie automatisch im Hintergrund.</string>
+    <string name="start_synchronization">Synchronisierung starten</string>
+    <string name="ready">Bereit</string>
+    <string name="storage_permission_denied">Fehler: Zugriff auf Downloads wurde nicht erlaubt.</string>
+    <string name="sync_preparing">Synchronisierung wird vorbereitet...</string>
+    <string name="progress_position_filename">%1$d/%2$d - %3$s</string>
+    <string name="progress_position">%1$d/%2$d</string>
+    <string name="no_unprocessed_videos">Keine unverarbeiteten Videos gefunden.</string>
+    <string name="sync_started">Synchronisierung gestartet...</string>
+    <string name="work_directory_error">Fehler: Arbeitsordner konnte nicht erstellt werden.</string>
+    <string name="converting">Konvertiere %1$d/%2$d...</string>
+    <string name="conversion_success">Erfolgreich synchronisiert: %1$s</string>
+    <string name="sync_complete">Synchronisierung abgeschlossen: %1$d/%2$d Videos erfolgreich.</string>
+    <string name="sync_complete_with_errors">Synchronisierung abgeschlossen: %1$d/%2$d erfolgreich, %3$d Fehler. Fehlgeschlagene Paare wurden behalten.</string>
+    <string name="error_message">Fehler: %1$s</string>
+    <string name="converting_percent">Konvertiere %1$d/%2$d - %3$d%%</string>
+    <string name="start_failed">Start fehlgeschlagen: %1$d</string>
+    <string name="arcsoft_error">Arcsoft-Fehler: %1$d</string>
+    <string name="output_missing">Arcsoft-Ausgabe fehlt</string>
+    <string name="processing_interrupted">Verarbeitung wurde unterbrochen</string>
+    <string name="pair_error">Fehler bei %1$s: %2$s</string>
+    <string name="new_video_empty">Neue Videodatei ist leer</string>
+    <string name="backup_original_failed">Originalvideo konnte nicht gesichert werden</string>
+    <string name="backup_txt_failed">TXT-Datei konnte nicht entfernt werden</string>
+    <string name="install_new_video_failed">Neues Video konnte nicht eingesetzt werden</string>
+    <string name="file_delete_failed">Datei konnte nicht gelöscht werden: %1$s</string>
+    <string name="notification_channel_name">Rokid-Synchronisierung</string>
+    <string name="notification_channel_description">Fortschritt der Rokid-Videosynchronisierung</string>
+    <string name="notification_title">Rokid-Synchronisierung</string>
+</resources>

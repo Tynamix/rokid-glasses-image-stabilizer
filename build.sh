@@ -19,15 +19,16 @@ rm -rf "$BUILD"
 mkdir -p "$BUILD/classes" "$BUILD/gen" "$BUILD/dex" "$BUILD/apk" "$BUILD/lib/arm64-v8a"
 cp "$NATIVE_DIR/"*.so "$BUILD/lib/arm64-v8a/"
 
+"$BT/aapt2" compile -o "$BUILD/resources.zip" --dir "$ROOT/res"
+"$BT/aapt2" link --manifest "$ROOT/AndroidManifest.xml" \
+  -I "$PLATFORM" -o "$BUILD/apk/resources.apk" "$BUILD/resources.zip" --java "$BUILD/gen"
 javac --release 8 -classpath "$PLATFORM" -d "$BUILD/classes" \
+  "$BUILD/gen/com/roman/rokidarcsoft/R.java" \
   "$ROOT/src/com/rokid/media/process/MediaManager.java" \
   "$ROOT/src/com/roman/rokidarcsoft/SynchronizationService.java" \
   "$ROOT/src/com/roman/rokidarcsoft/MainActivity.java"
 jar cf "$BUILD/classes.jar" -C "$BUILD/classes" .
 
-"$BT/aapt2" compile -o "$BUILD/resources.zip" --dir "$ROOT/res"
-"$BT/aapt2" link --manifest "$ROOT/AndroidManifest.xml" \
-  -I "$PLATFORM" -o "$BUILD/apk/resources.apk" "$BUILD/resources.zip" --java "$BUILD/gen"
 "$BT/d8" --lib "$PLATFORM" --output "$BUILD/dex" "$BUILD/classes.jar"
 
 cp "$BUILD/apk/resources.apk" "$BUILD/apk/unsigned.apk"

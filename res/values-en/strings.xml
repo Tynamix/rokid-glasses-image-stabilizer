@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rokid Arcsoft Converter</string>
+    <string name="sync_description">Searches Downloads/Hi Rokid for MP4 files with a matching TXT file and synchronizes them automatically in the background.</string>
+    <string name="start_synchronization">Start synchronization</string>
+    <string name="ready">Ready</string>
+    <string name="storage_permission_denied">Error: Access to Downloads was not allowed.</string>
+    <string name="sync_preparing">Preparing synchronization...</string>
+    <string name="progress_position_filename">%1$d/%2$d - %3$s</string>
+    <string name="progress_position">%1$d/%2$d</string>
+    <string name="no_unprocessed_videos">No unprocessed videos found.</string>
+    <string name="sync_started">Synchronization started...</string>
+    <string name="work_directory_error">Error: Could not create the working directory.</string>
+    <string name="converting">Converting %1$d/%2$d...</string>
+    <string name="conversion_success">Synchronized successfully: %1$s</string>
+    <string name="sync_complete">Synchronization complete: %1$d/%2$d videos successful.</string>
+    <string name="sync_complete_with_errors">Synchronization complete: %1$d/%2$d successful, %3$d errors. Failed pairs were kept.</string>
+    <string name="error_message">Error: %1$s</string>
+    <string name="converting_percent">Converting %1$d/%2$d - %3$d%%</string>
+    <string name="start_failed">Start failed: %1$d</string>
+    <string name="arcsoft_error">Arcsoft error: %1$d</string>
+    <string name="output_missing">Arcsoft output is missing</string>
+    <string name="processing_interrupted">Processing was interrupted</string>
+    <string name="pair_error">Error processing %1$s: %2$s</string>
+    <string name="new_video_empty">The new video file is empty</string>
+    <string name="backup_original_failed">Could not secure the original video</string>
+    <string name="backup_txt_failed">Could not remove the TXT file</string>
+    <string name="install_new_video_failed">Could not install the new video</string>
+    <string name="file_delete_failed">Could not delete file: %1$s</string>
+    <string name="notification_channel_name">Rokid synchronization</string>
+    <string name="notification_channel_description">Rokid video synchronization progress</string>
+    <string name="notification_title">Rokid synchronization</string>
+</resources>

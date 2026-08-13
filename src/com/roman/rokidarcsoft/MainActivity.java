@@ -74,13 +74,13 @@ public final class MainActivity extends Activity {
         root.setPadding(48, 48, 48, 32);
 
         TextView title = new TextView(this);
-        title.setText("Rokid Arcsoft Converter");
+        title.setText(R.string.app_name);
         title.setTextSize(24);
         title.setTextColor(0xff111827);
         root.addView(title, new LinearLayout.LayoutParams(-1, -2));
 
         TextView explanation = new TextView(this);
-        explanation.setText("Sucht in Downloads/Hi Rokid nach MP4-Dateien mit passender TXT-Datei und synchronisiert sie automatisch im Hintergrund.");
+        explanation.setText(R.string.sync_description);
         explanation.setTextSize(15);
         explanation.setTextColor(0xff4b5563);
         LinearLayout.LayoutParams explanationParams = new LinearLayout.LayoutParams(-1, -2);
@@ -88,7 +88,7 @@ public final class MainActivity extends Activity {
         root.addView(explanation, explanationParams);
 
         synchronizeButton = new Button(this);
-        synchronizeButton.setText("Start Synchronization");
+        synchronizeButton.setText(R.string.start_synchronization);
         synchronizeButton.setOnClickListener(v -> requestSynchronization());
         addTopMargin(root, synchronizeButton);
 
@@ -102,7 +102,7 @@ public final class MainActivity extends Activity {
         currentLabel = label("");
         root.addView(currentLabel);
 
-        statusLabel = label("Bereit");
+        statusLabel = label(getString(R.string.ready));
         LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(-1, -2);
         statusParams.topMargin = 16;
         root.addView(statusLabel, statusParams);
@@ -149,7 +149,7 @@ public final class MainActivity extends Activity {
         if (hasStoragePermission()) {
             startSynchronizationService();
         } else {
-            statusLabel.setText("Fehler: Zugriff auf Downloads wurde nicht erlaubt.");
+            statusLabel.setText(R.string.storage_permission_denied);
         }
     }
 
@@ -161,7 +161,7 @@ public final class MainActivity extends Activity {
             startService(intent);
         }
         synchronizeButton.setEnabled(false);
-        statusLabel.setText("Synchronisierung wird vorbereitet...");
+        statusLabel.setText(R.string.sync_preparing);
     }
 
     private void renderStatus(SynchronizationService.Status status) {
@@ -169,10 +169,11 @@ public final class MainActivity extends Activity {
         synchronizeButton.setEnabled(!status.running);
 
         if (status.total > 0 && status.running) {
-            currentLabel.setText((status.processed + 1) + "/" + status.total
-                    + " - " + status.currentName);
+            currentLabel.setText(getString(R.string.progress_position_filename,
+                    status.processed + 1, status.total, status.currentName));
         } else if (status.total > 0) {
-            currentLabel.setText(status.processed + "/" + status.total);
+            currentLabel.setText(getString(R.string.progress_position,
+                    status.processed, status.total));
         } else {
             currentLabel.setText("");
         }
