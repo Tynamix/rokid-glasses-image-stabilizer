@@ -1,0 +1,8 @@
+build/
+Rokid-Arcsoft-Converter.apk
+*.idsig
+native/arm64-v8a/*.so
+native/arm64-v8a/*.apk
+*.jks
+*.keystore
+.DS_Store
